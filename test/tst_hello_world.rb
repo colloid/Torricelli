@@ -1,10 +1,11 @@
 require "test/unit"
 require "shoulda"
+require "pascal"
 
 class Test_hello_world < Test::Unit::TestCase
     context "Hello world:" do
         setup do
-            @ast = File.open("../../examples/hello_world.pas") do |file|
+            @ast = File.open("examples/hello_world.pas") do |file|
                 Pascal.parse_file(file.fileno)
             end
         end

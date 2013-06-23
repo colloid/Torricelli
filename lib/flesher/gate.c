@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <ruby.h>
+
 #include "ast.h"
-#include "parser.tab.h"
+#include "parser.h"
 
 VALUE mPascal;
 VALUE cProgram;
@@ -15,12 +18,12 @@ static VALUE parse_file(VALUE self, VALUE fd)
     yyin = fdopen(NUM2INT(fd), "r");
 
     if (!yyin) {
-        perror("pascal.so"); /* TODO */
+        rb_raise(rb_eRuntimeError, "pascal.so: parse_file: %s", 
+                 strerror(errno));
     }
 
     VALUE ast;
     if (yyparse(&ast)) {
-        //VALUE exception = rb_class_new_instance(0, NULL, cSyntaxError);
         rb_raise(cSyntaxError, "Syntax error");
     }
     return ast;

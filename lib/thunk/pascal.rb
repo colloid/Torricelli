@@ -1,3 +1,5 @@
+require "lib/flesher/pascal.so"
+
 module Pascal
     class Program
         attr_reader :name           # String

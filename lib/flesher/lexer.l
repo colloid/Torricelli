@@ -4,7 +4,7 @@
 
 %{
 #include <ruby.h>
-#include "parser.tab.h"
+#include "parser.h"
 #include "ast.h"
 
 #ifdef VERBOSE_PARSING
