@@ -1,0 +1,8 @@
+*.swp
+*.o
+*.so
+*.tab.c
+*.tab.h
+parser.output
+core
+lex.yy.c

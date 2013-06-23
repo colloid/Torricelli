@@ -1,0 +1,2 @@
+Ruby plugin written in C which parses source code and constructs AST.
+Parsers receives a file descriptor as the input.
