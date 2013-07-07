@@ -3,8 +3,10 @@ var
     a: Char;
     b: Char;
 begin
-    read(a, b);
-    writeln(b, a);
+    a := 'a';
+    b := 'b';
+    {read(a, b);}
+    writeln(b, a)
 end.
 
 

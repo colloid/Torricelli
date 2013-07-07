@@ -2,7 +2,7 @@
 
 include $(HOME)/mf.conf
 
-LIBNAME = pascal
+LIBNAME = cinderella
 all: $(LIBNAME).so $(LIBNAME)_verbose.so
 
 C_SOURCES = gate.c ast.c
@@ -16,7 +16,7 @@ gate.c: parser.c ast.h
 lexer.c: parser.c ast.h
 ast.c: ast.h
 
-CFLAGS   = -fPIC -g -O0 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wall -fno-strict-aliasing
+CFLAGS   = -fPIC -g -O0 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror -Wall -fno-strict-aliasing
 YFLAGS = -vd
 
 %.o: %.c

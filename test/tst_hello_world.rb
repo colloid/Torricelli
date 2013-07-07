@@ -19,7 +19,7 @@ class Test_hello_world < Test::Unit::TestCase
         end
 
         should "have no declarations" do
-            assert_nil(@ast.declarations)
+            assert_empty(@ast.declarations)
         end
 
         context "Program block:" do

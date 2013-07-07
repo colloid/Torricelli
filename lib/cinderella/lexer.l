@@ -35,6 +35,14 @@
 
 #endif /* VERBOSE_PARSING */
 
+/* handle locations */
+int yycolumn = 1;
+
+#define YY_USER_ACTION yylloc.filename = filename; \
+    yylloc.first_line = yylloc.last_line = yylineno; \
+    yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
+    yycolumn += yyleng;
+
 %}
 
 %%
@@ -124,8 +132,20 @@
     TOKEN_V(IDENTIFIER, yylval.ch) 
 }
 
-"{"([^}]|"\n")*"}"  { /* skip comments */ }
-[[:space:]]         { /* skip spaces */ }
+"{"([^}]|"\n")*"}"  { /* skip comments */ 
+                        char* ptr = yytext + yyleng - 1;
+                        char* ptr0 = ptr;
+                        while (ptr >= yytext) {
+                            if (*ptr == '\n') {
+                                yycolumn = ptr0 - ptr + 1;
+                                break;
+                            }
+                            --ptr;
+                        }
+                    }
+
+[ \t]               { /* skip spaces */ }
+\n                  { yycolumn = 1; }
 .                   { yyerror(NULL, "unknown char %c", yytext[0]); }
 
 %%

@@ -1,10 +1,13 @@
 %parse-param { VALUE *ast }
+%locations
 
 %{
-#include "ast.h"
-
-extern int yylex(void);
 %}
+
+%code requires {
+#include "ast.h"
+extern int yylex(void);
+}
 
 %union { 
     VALUE rb;
@@ -18,6 +21,7 @@ extern int yylex(void);
 %type <rb> VARIABLE_DECLARATION IDENTIFIER_LIST COMPOUND_STATEMENT
 %type <rb> STATEMENT_SEQUENCE STATEMENT PROCEDURE_STATEMENT
 %type <rb> ACTUAL_PARAMETER_LIST ACTUAL_PARAMETER EXPRESSION
+%type <rb> ASSIGNMENT_STATEMENT
 
 %left '+' '-'
 %left '>'
@@ -32,7 +36,7 @@ PROGRAM :
 
 PROGRAM_HEADING :
       KW_PROGRAM IDENTIFIER 
-            { $$ = pas_program_heading($2); }
+            { $$ = pas_program_heading($2, @2); }
 ;
 
 BLOCK :
@@ -48,22 +52,22 @@ VARIABLE_DECLARATION_PART :
 ;
 
 VARIABLE_DECLARATION_LIST :
-      VARIABLE_DECLARATION ';' 
+      VARIABLE_DECLARATION
             { $$ = pas_variable_declaration_list(0, $1);}
-    | VARIABLE_DECLARATION_LIST ';' VARIABLE_DECLARATION
-            { $$ = pas_variable_declaration_list($1, $3); }
+    | VARIABLE_DECLARATION_LIST VARIABLE_DECLARATION
+            { $$ = pas_variable_declaration_list($1, $2); }
 ;
 
 VARIABLE_DECLARATION :
-      IDENTIFIER_LIST ':' IDENTIFIER 
-            { $$ = pas_variable_declaration($1, $3); }
+      IDENTIFIER_LIST ':' IDENTIFIER ';'
+            { $$ = pas_variable_declaration($1, $3, @3); }
 ;
 
 IDENTIFIER_LIST :
       IDENTIFIER 
-            { $$ = pas_identifier_list(0, $1); }
+            { $$ = pas_identifier_list(0, $1, @1); }
     | IDENTIFIER_LIST ',' IDENTIFIER
-            { $$ = pas_identifier_list($1, $3); }
+            { $$ = pas_identifier_list($1, $3, @3); }
 ;
 
 COMPOUND_STATEMENT :
@@ -81,13 +85,20 @@ STATEMENT_SEQUENCE :
 STATEMENT :
       PROCEDURE_STATEMENT 
             { $$ = $1; }
+    | ASSIGNMENT_STATEMENT
+            { $$ = $1; }
 ;
 
 PROCEDURE_STATEMENT :
       IDENTIFIER '(' ACTUAL_PARAMETER_LIST ')' 
-            { $$ = pas_procedure_statement($1, $3); }
+            { $$ = pas_procedure_statement($1, @1, $3); }
     | IDENTIFIER '(' ')' 
-            { $$ = pas_procedure_statement($1, 0); }
+            { $$ = pas_procedure_statement($1, @1, 0); }
+;
+
+ASSIGNMENT_STATEMENT :
+      IDENTIFIER COL_EQ EXPRESSION
+            { $$ = pas_assignment_statement($1, @1, $3); }
 ;
 
 ACTUAL_PARAMETER_LIST :
@@ -105,6 +116,8 @@ ACTUAL_PARAMETER :
 EXPRESSION :
       STR_LTR 
             { $$ = pas_string_literal($1); }
+    | IDENTIFIER
+            { $$ = pas_evaluate_variable($1, @1); }
 ;
       
 %%  

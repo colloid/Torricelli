@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/pascal'
+
+ARGV.each do |filename|
+    begin
+        ast = Pascal.parse_file(filename)
+        srt = ast.perceive
+        srt.eval
+    rescue
+        puts $!
+    end
+end

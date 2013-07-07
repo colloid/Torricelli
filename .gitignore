@@ -6,3 +6,6 @@
 parser.output
 core
 lex.yy.c
+lib/cinderella/lexer.c
+lib/cinderella/parser.c
+lib/cinderella/parser.h

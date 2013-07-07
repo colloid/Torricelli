@@ -7,12 +7,10 @@ VALUE pas_program(VALUE name, VALUE rest)
     return rest;
 }
 
-VALUE pas_program_heading(const char* name)
+VALUE pas_program_heading(const char* name, YYLTYPE location)
 {
     STAMP();
-    VALUE heading = rb_str_new2(name);
-    free((char*) name);
-    return heading;
+    return make_ruby_token(name, location);
 }
 
 VALUE pas_block(VALUE decl, VALUE stmt)
@@ -27,7 +25,7 @@ VALUE pas_block(VALUE decl, VALUE stmt)
 VALUE pas_variable_declaration_part(VALUE list)
 {
     STAMP();
-    return (list) ? list : Qnil;
+    return (list) ? list : rb_ary_new();
 }
 
 VALUE pas_variable_declaration_list(VALUE list, VALUE decl)
@@ -38,23 +36,21 @@ VALUE pas_variable_declaration_list(VALUE list, VALUE decl)
     return rb_ary_push(list, decl);
 }
 
-VALUE pas_variable_declaration(VALUE list, const char *type)
+VALUE pas_variable_declaration(VALUE list, const char *type, YYLTYPE location)
 {
     STAMP();
     VALUE decl = rb_class_new_instance(0, NULL, cDeclarationLine);
     rb_iv_set(decl, "@variables", list);
-    rb_iv_set(decl, "@type", rb_str_new2(type));
-    free((char*) type);
+    rb_iv_set(decl, "@type", make_ruby_token(type, location));
     return decl;
 }
 
-VALUE pas_identifier_list(VALUE list, const char *id)
+VALUE pas_identifier_list(VALUE list, const char *id, YYLTYPE location)
 {
     STAMP();
     if (!list)
         list = rb_ary_new();
-    list = rb_ary_push(list, rb_str_new2(id));
-    free((char*) id);
+    list = rb_ary_push(list, make_ruby_token(id, location));
     return list;
 }
 
@@ -66,13 +62,12 @@ VALUE pas_statement_sequence(VALUE seq, VALUE stmt)
     return rb_ary_push(seq, stmt);
 }
 
-VALUE pas_procedure_statement(const char* name, VALUE parameters) 
+VALUE pas_procedure_statement(const char* name, YYLTYPE location, VALUE arguments) 
 {
     STAMP();
     VALUE call = rb_class_new_instance(0, NULL, cFunctionCall);
-    rb_iv_set(call, "@name", rb_str_new2(name));
-    free((char*) name);
-    rb_iv_set(call, "@parameters", parameters ? parameters : rb_ary_new());
+    rb_iv_set(call, "@name", make_ruby_token(name, location));
+    rb_iv_set(call, "@arguments", arguments ? arguments : rb_ary_new());
     return call;
 }
 
@@ -90,5 +85,22 @@ VALUE pas_string_literal(const char * literal)
     VALUE instance = rb_class_new_instance(0, NULL, cStringLiteral);
     rb_iv_set(instance, "@string", rb_str_new2(literal));
     free((char*) literal);
+    return instance;
+}
+
+VALUE pas_assignment_statement(const char *name, YYLTYPE location, VALUE expr)
+{
+    STAMP();
+    VALUE instance = rb_class_new_instance(0, NULL, cAssignmentStatement);
+    rb_iv_set(instance, "@expression", expr);
+    rb_iv_set(instance, "@name", make_ruby_token(name, location));
+    return instance;
+}
+
+VALUE pas_evaluate_variable(const char *name, YYLTYPE location)
+{
+    STAMP();
+    VALUE instance = rb_class_new_instance(0, NULL, cEvaluateVariable);
+    rb_iv_set(instance, "@name", make_ruby_token(name, location));
     return instance;
 }
